@@ -137,7 +137,7 @@ function App() {
 
   function loginWithGoogle() {
     window.location.href =
-      'http://localhost:5000/api/auth/google';
+      'https://reachinbox-scheduler-ms2m.onrender.com/api/auth/google';
   }
 
   async function handleLogout() {
