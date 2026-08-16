@@ -36,9 +36,6 @@ function App() {
    * Authentication state
    * ==================================================
    */
-  const handleGoogleLogin = () => {
-    window.location.href = `${API_URL}/auth/google`;
-  };
 
   const [authLoading, setAuthLoading] =
     useState(true);
