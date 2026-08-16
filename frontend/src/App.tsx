@@ -26,12 +26,19 @@ interface AuthUser {
   avatarUrl?: string | null;
 }
 
+const API_URL =
+  import.meta.env.VITE_API_URL ??
+  'http://localhost:5000/api';
+
 function App() {
   /*
    * ==================================================
    * Authentication state
    * ==================================================
    */
+  const handleGoogleLogin = () => {
+    window.location.href = `${API_URL}/auth/google`;
+  };
 
   const [authLoading, setAuthLoading] =
     useState(true);
