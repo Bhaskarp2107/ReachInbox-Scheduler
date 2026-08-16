@@ -17,8 +17,7 @@ export const env = {
 
   databaseUrl: getEnv('DATABASE_URL'),
 
-  redisHost: process.env.REDIS_HOST ?? 'localhost',
-  redisPort: Number(process.env.REDIS_PORT ?? 6379),
+  redisUrl: getEnv('REDIS_URL'),
 
   frontendUrl:
     process.env.FRONTEND_URL ?? 'http://localhost:5173',
