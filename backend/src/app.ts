@@ -10,11 +10,17 @@ import { env } from './config/env';
 const app = express();
 
 /*
- * ==================================================
- * CORS
- * ==================================================
+ * Render terminates HTTPS at its proxy.
+ * Express needs to trust that proxy so secure
+ * session cookies work correctly.
  */
+if (process.env.NODE_ENV === 'production') {
+  app.set('trust proxy', 1);
+}
 
+/*
+ * CORS
+ */
 app.use(
   cors({
     origin: env.frontendUrl,
@@ -23,19 +29,13 @@ app.use(
 );
 
 /*
- * ==================================================
  * Body parser
- * ==================================================
  */
-
 app.use(express.json());
 
 /*
- * ==================================================
  * Session
- * ==================================================
  */
-
 app.use(
   session({
     secret: env.sessionSecret,
@@ -46,8 +46,12 @@ app.use(
 
     cookie: {
       httpOnly: true,
-      secure: false,
+
+      secure:
+        process.env.NODE_ENV === 'production',
+
       sameSite: 'lax',
+
       maxAge:
         1000 *
         60 *
@@ -59,21 +63,15 @@ app.use(
 );
 
 /*
- * ==================================================
  * Passport
- * ==================================================
  */
-
 app.use(passport.initialize());
 app.use(passport.session());
 
 /*
- * ==================================================
  * Health
- * ==================================================
  */
-
-app.get('/health', async (_req, res) => {
+app.get('/health', (_req, res) => {
   res.json({
     status: 'ok',
     service: 'reachinbox-backend',
@@ -81,22 +79,16 @@ app.get('/health', async (_req, res) => {
 });
 
 /*
- * ==================================================
  * Authentication
- * ==================================================
  */
-
 app.use(
   '/api/auth',
   authRoutes
 );
 
 /*
- * ==================================================
  * Email APIs
- * ==================================================
  */
-
 app.use(
   '/api/emails',
   emailRoutes
