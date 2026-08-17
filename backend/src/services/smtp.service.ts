@@ -1,15 +1,4 @@
-import nodemailer from 'nodemailer';
 import { env } from '../config/env';
-
-const transporter = nodemailer.createTransport({
-  host: env.smtpHost,
-  port: env.smtpPort,
-  secure: env.smtpSecure,
-  auth: {
-    user: env.smtpUser,
-    pass: env.smtpPassword,
-  },
-});
 
 export async function sendEmailViaSmtp({
   to,
@@ -22,27 +11,58 @@ export async function sendEmailViaSmtp({
   body: string;
   from: string;
 }) {
-  const info = await transporter.sendMail({
-    from,
-    to,
-    subject,
-    text: body,
-  });
-
   console.log('=================================');
-  console.log('Email sent successfully');
-  console.log('Message ID:', info.messageId);
-  console.log('Accepted:', info.accepted);
-  console.log('Rejected:', info.rejected);
+  console.log('Sending email through Brevo API');
+  console.log('To:', to);
+  console.log('From:', from);
+  console.log('Subject:', subject);
 
-  if (info.messageId) {
-    console.log(
-      'Ethereal preview:',
-      `https://ethereal.email/message/${info.messageId}`
+  const response = await fetch(
+    'https://api.brevo.com/v3/smtp/email',
+    {
+      method: 'POST',
+      headers: {
+        accept: 'application/json',
+        'api-key': env.brevoApiKey,
+        'content-type': 'application/json',
+      },
+      body: JSON.stringify({
+        sender: {
+          email: from,
+        },
+        to: [
+          {
+            email: to,
+          },
+        ],
+        subject,
+        textContent: body,
+      }),
+    }
+  );
+
+  const responseText = await response.text();
+
+  if (!response.ok) {
+    console.error('Brevo API error:', response.status);
+    console.error('Brevo response:', responseText);
+
+    throw new Error(
+      `Brevo API error ${response.status}: ${responseText}`
     );
   }
 
+  let result: { messageId?: string };
+
+  try {
+    result = JSON.parse(responseText);
+  } catch {
+    result = {};
+  }
+
+  console.log('Email sent successfully through Brevo');
+  console.log('Message ID:', result.messageId);
   console.log('=================================');
 
-  return info;
+  return result;
 }
